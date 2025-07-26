@@ -1,4 +1,4 @@
-# CS180-Project-
+# CS180-Project-Job-Matcher-AI-Agent
 This Repository is for the cs180 final project and overall learning about how to incorportate A.I.
 
 # Job Matcher AI Agent
