@@ -1,24 +1,21 @@
 import os
 import sys
-# import json
-import pdfplumber
-import requests
-# import openai
 from dotenv import load_dotenv
+import pdfplumber
 from typing import List
 from crewai import Agent, Crew, Task, Process
 from crewai.tools import tool
+import requests
 #load up and import everything we need
 
-load_dotenv()
-#load environment and grab all necessary api keys. 
+
+load_dotenv() #load environment and grab all necessary api keys.
 CREWAI_API_KEY = os.getenv("CREWAI_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
 ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID")
 ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY")
 
-if not CREWAI_API_KEY: #make sure that we have all the keys, 
+if not CREWAI_API_KEY:#make sure that we have all the keys,
     raise RuntimeError("…")
 if not OPENAI_API_KEY:
     raise RuntimeError("Please set OPENAI_API_KEY in your environment or .env file")
@@ -30,13 +27,13 @@ os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY #we use openai
 #
 # -----------------------------------------------------------------------------
 
-@tool("parse_resume") #using the tool, it should get info from pdf. 
+@tool("parse_resume")#using the tool, it should get info from pdf. 
 def parse_resume(pdf_path: str) -> dict:
     """
     Extract skills, experience, and education sections from a resume PDF.
     """
     info = {"skills": [], "experience": [], "education": []}
-    with pdfplumber.open(pdf_path) as pdf: #opens the pdf that is uploaded. 
+    with pdfplumber.open(pdf_path) as pdf: #opens the pdf that is uploaded
         text = "\n".join(page.extract_text() or "" for page in pdf.pages)
     return info
 
@@ -47,7 +44,7 @@ def fetch_jobs(keywords: List[str]) -> List[dict]:
     Fetch job postings that match a list of keywords.
     """
     # TODO: IMPLEMENT HOW TO GET THE DATABASE
-    if not ADZUNA_APP_ID or not ADZUNA_APP_KEY: #ensures Adzuna api key is used. 
+    if not ADZUNA_APP_ID or not ADZUNA_APP_KEY: #ensures Adzuna api key is used.
       raise RuntimeError("Please set ADZUNA_APP_ID and ADZUNA_APP_KEY in your environment or .env file")
 
     url = "https://api.adzuna.com/v1/api/jobs/us/search/1"
@@ -56,7 +53,7 @@ def fetch_jobs(keywords: List[str]) -> List[dict]:
         "app_key": ADZUNA_APP_KEY,
         "what": " ".join(keywords),
         "results_per_page": 1,
-    } #my api stuff 
+    }#my api stuff 
 
     resp = requests.get(url, params=params) #get it one more time
     resp.raise_for_status()
@@ -75,10 +72,9 @@ def fetch_jobs(keywords: List[str]) -> List[dict]:
 @tool("rank_jobs") #since there was problems with 5... 3.... 2... reach only 1 job now
 def rank_jobs(parsed: dict, jobs: List[dict]) -> List[dict]:
     """
-    Return the top 1 ranked job. 
+    Rank job postings by keyword overlap using local ranking logic.
     """
-    ranked = rank_jobs_local(parsed, jobs)
-    return ranked[:1]
+    return rank_jobs_local(parsed, jobs)
 
 #------------------------------------------------------------------------------
 #LOCAL NOT AI TESTING
@@ -99,7 +95,7 @@ def rank_jobs_local(parsed: dict, jobs: List[dict]) -> List[dict]:
 
 
 
-# def run_local(pdf_path: str): #use this to test and ensure that without using llm we can make it work. Successful
+# def run_local(pdf_path: str):
 #     """Run parsing, fetching, and local ranking without calling the LLM."""
 #     # Directly call the plain functions, not tool primitives
 #     parsed = parse_resume(pdf_path)
@@ -118,21 +114,22 @@ def rank_jobs_local(parsed: dict, jobs: List[dict]) -> List[dict]:
 # -----------------------------------------------------------------------------
 
 matcher = Agent( #AI agent is set up here, now specify it muchacho. 
-    backstory="",
-    role="JobMatcher",
-    goal="Fetch and rank one job",
+    backstory="You are an AI assistant specialized in matching candidate resumes to relevant job openings.",
+    role="Job Matcher",
+    goal="Extract, fetch, and rank jobs",
     tools=[parse_resume, fetch_jobs, rank_jobs],
-    llm="gpt-3.5-turbo", #cheapest model ngl
-    memory=False,       #turn off because its too much and we have to pay gang. 
-    verbose=False       # 
+    llm="gpt-3.5-turbo",
+    memory=True,       
+    verbose=True       
 )
 
 task = Task(
     description=(
-        "Call parse_resume, fetch_jobs, then rank_jobs; return exactly the top job dict (title, company, location, url)."
+        "Parse the resume PDF, fetch matching job postings, and rank them locally using the rank_jobs tool; "
+        "return exactly the list of ranked job dicts (title, company, location, url) with no explanations or extra text."
     ),
     agent=matcher,
-    expected_output="A single job dict, no explanations."
+    expected_output="A list of job dicts in ranked order, with no explanations."
 
 )
 
@@ -140,7 +137,7 @@ crew = Crew(
     agents=[matcher],
     tasks=[task],
     process=Process.sequential,
-    verbose=False
+    verbose=True
 )
 
 
@@ -148,8 +145,7 @@ crew = Crew(
 
 # -----------------------------------------------------------------------------
 
-
-def run_agent(pdf_path: str): #call the agent here and test it gang. 
+def run_agent(pdf_path: str):
     result = crew.kickoff(inputs={"pdf_path": pdf_path})
     print("\n=== Recommended Jobs ===")
     print(result)
@@ -165,7 +161,3 @@ if __name__ == "__main__":
 # # 2) Fetch jobs (stub)
 # jobs = fetch_jobs._run(parsed["skills"] + parsed["experience"])
 # print("Stubbed job list:", jobs)
-
-
-# !pip install crewai pdfplumber python-dotenv
-# !pip install crewai crewai[tools] python-dotenv pdfplumber requests
