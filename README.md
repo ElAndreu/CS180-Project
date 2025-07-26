@@ -48,4 +48,7 @@ a small example of what the path can look like: "/home/user/resume.pdf"
 
 E.G. If you have python, it will look for positions that have python as a requirement. 
 
+## Output would have been like this: 
+<img width="1203" height="652" alt="image" src="https://github.com/user-attachments/assets/1ade5e6b-2395-4b8b-ba47-4794cda42767" />
+
 ## DISCLAIMAER. I was not able to fully finish the project because I was using too much LLM and it requested me to change my plan. It did the same thing for gemini :( 
