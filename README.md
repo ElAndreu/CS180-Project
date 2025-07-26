@@ -47,3 +47,5 @@ a small example of what the path can look like: "/home/user/resume.pdf"
 -Another thing we use is the keywords gathered from the resume. These will be able to gather inforation to try and find the best compatible job that our AI agent can find in Adzuna. 
 
 E.G. If you have python, it will look for positions that have python as a requirement. 
+
+## DISCLAIMAER. I was not able to fully finish the project because I was using too much LLM and it requested me to change my plan. It did the same thing for gemini :( 
