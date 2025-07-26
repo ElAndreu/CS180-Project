@@ -51,4 +51,6 @@ E.G. If you have python, it will look for positions that have python as a requir
 ## Output would have been like this: 
 <img width="1203" height="652" alt="image" src="https://github.com/user-attachments/assets/1ade5e6b-2395-4b8b-ba47-4794cda42767" />
 
+Unfortunately, this is a project to be completed as there were issues where the LLM was being used too much and my quota was going above that of the free quota. 
+
 ## DISCLAIMAER. I was not able to fully finish the project because I was using too much LLM and it requested me to change my plan. It did the same thing for gemini :( 
